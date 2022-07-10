@@ -1,9 +1,10 @@
 import asyncio
 from aiohttp import ClientSession
 
+
 async def get_posts():
     async with ClientSession() as session:
-        async with session.get("http://127.0.0.1:8080/posts") as resp:
+        async with session.get("http://127.0.0.1:5432/posts") as resp:
             return await resp.json()
 
 
@@ -17,8 +18,8 @@ async def post_posts():
     async with ClientSession() as session:
         async with session.post(f"http://127.0.0.1:8080/post", json={
 
-            "header": "me",
-            "text": "data",
+            "title": "",
+            "description": "data",
             "owner_id": 1
         }) as resp:
             if resp.status != 201:

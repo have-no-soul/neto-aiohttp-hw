@@ -9,7 +9,16 @@ from views import PostsView, PostView
 if sys.version_info >= (3, 8) and sys.platform.lower().startswith("win"):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-DB_DSN = "postgres://postgres:???????@127.0.0.1:5432/aiohttp"
+app = web.Application()
+
+DB_DSN = "postgres://admin:1234@127.0.0.1:5432/aiohttp"
+
+
+async def orm_context(app):
+    await db.set_bind(DB_DSN)
+    await db.gino.create_all()
+    yield
+    await db.pop_bind().close()
 
 
 async def register_pg_pool(app):
@@ -20,15 +29,7 @@ async def register_pg_pool(app):
     print("end")
 
 
-async def register_orm(app):
-    await db.set_bind(DB_DSN)
-    await db.gino.create_all()
-    yield
-    await db.pop_bind().close()
-
-
 if __name__ == "__main__":
-    app = web.Application()
     app.add_routes([
         web.get("/posts", PostsView)
     ])
@@ -39,5 +40,5 @@ if __name__ == "__main__":
         web.delete("/post/{post_id:\d+}", PostView)
     ])
     app.cleanup_ctx.append(register_pg_pool)
-    app.cleanup_ctx.append(register_orm)
+    app.cleanup_ctx.append(orm_context)
     web.run_app(app)

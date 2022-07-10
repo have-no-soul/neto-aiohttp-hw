@@ -34,7 +34,6 @@ class BaseModelMixin:
 
 
 class Users(db.Model, BaseModelMixin):
-
     __tablename__ = "users"
 
     id = db.Column(db.Integer(), primary_key=True)
@@ -51,21 +50,21 @@ class Users(db.Model, BaseModelMixin):
         return dict_user
 
 
-class Posts(db.Model, BaseModelMixin):
+class Posts(db.Model):
     __tablename__ = "posts"
 
-    id = db.Column(db.Integer(), primary_key=True)
-    header = db.Column(db.String(50))
-    text = db.Column(db.String(1000))
-    created_date = db.Column(db.DateTime, default=datetime.today)
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(50))
+    description = db.Column(db.String(1000))
+    creation_date = db.Column(db.DateTime, default=datetime.utcnow)
     owner_id = db.Column(db.Integer(), db.ForeignKey(Users.id))
 
     def to_dict(self):
         posts = {
             "id": self.id,
-            "header": self.header,
-            "text": self.text,
-            "created_date": str(self.created_date),
+            "title": self.title,
+            "description": self.description,
+            "creation_date": str(self.creation_date),
             "owner_id": self.owner_id
         }
         return posts
@@ -75,6 +74,10 @@ async def return_all_posts():
     get = await Posts.query.gino.all()
     some_list = []
     for post in get:
-        some_list.append({"id": post.id, "header": post.header, "text": post.text,
-                          "created_date": str(post.created_date), "owner_id": str(post.owner_id)})
+        some_list.append({"id": post.id,
+                          "title": post.title,
+                          "description": post.description,
+                          "creation_date": str(post.creation_date),
+                          "owner_id": str(post.owner_id)
+                          })
     return some_list
